@@ -10,7 +10,9 @@ extern crate raw;
 extern crate result;
 
 use core::marker::Unsize;
+use core::mem::size_of;
 use core::ops::{CoerceUnsized, Deref, DerefMut};
+use core::ptr::{null, write};
 use errors::*;
 use macros::prelude::*;
 use raw::{AsRaw, AsRawMut};
@@ -136,20 +138,6 @@ impl<T: ?Sized> Ptr<T> {
         self.ptr as *const u8 as usize % 2 != 0
     }
 
-    /*
-    pub fn raw(&self) -> *mut T {
-        if self.get_bit() {
-            let mut ret = self.ptr;
-            unsafe {
-                ffi::ptr_add(&mut ret as *mut _ as *mut u8, -1);
-            }
-            ret as *mut T
-        } else {
-            self.ptr as *mut T
-        }
-    }
-    */
-
     pub fn release(&self) {
         unsafe {
             ffi::release(self.as_ptr() as *const u8);
@@ -169,6 +157,38 @@ impl<T: ?Sized> Ptr<T> {
                 })
             }
         }
+    }
+}
+
+impl<T: Copy> Ptr<T> {
+    pub fn alloc(t: T) -> Result<Self> {
+        let ptr = unsafe { ffi::alloc(size_of::<T>()) as *const T };
+
+        if ptr.is_null() {
+            err!(Alloc)
+        } else if (ptr as *const u8 as usize) % 2 != 0 {
+            err!(MisalignedPointer)
+        } else {
+            unsafe {
+                write(ptr as *mut T, t);
+            }
+            Ok(Self { ptr })
+        }
+    }
+}
+
+impl<T> Ptr<T> {
+    pub fn null() -> Self {
+        let ptr = null();
+        Self { ptr }
+    }
+
+    pub fn offt(&mut self, n: usize) -> *mut T {
+        unsafe { (self.as_mut_ptr() as *mut u8).add(n) as *mut T }
+    }
+
+    pub fn add(&mut self, n: usize) -> *mut T {
+        unsafe { (self.as_mut_ptr() as *mut T).add(n) }
     }
 }
 
