@@ -2,18 +2,16 @@
 #![feature(coerce_unsized)]
 #![feature(unsize)]
 
-extern crate error;
+extern crate errors;
 extern crate ffi;
 extern crate raw;
 extern crate result;
 
 use core::marker::Unsize;
 use core::ops::{CoerceUnsized, Deref, DerefMut};
-use error::prelude::*;
+use errors::prelude::*;
 use raw::{AsRaw, AsRawMut};
 use result::Result;
-
-errors!(Alloc, MisalignedPointer);
 
 #[derive(Clone, Copy)]
 pub struct Ptr<T: ?Sized> {
