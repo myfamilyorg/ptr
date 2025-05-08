@@ -6,3 +6,4 @@
 	errors = { git = "https://github.com/myfamilyorg/errors" }
 	raw = { git = "https://github.com/myfamilyorg/raw" }
 	macros = { git = "https://github.com/myfamilyorg/macros" }
+	error = { git = "https://github.com/myfamilyorg/error" }

@@ -2,6 +2,7 @@
 #![feature(coerce_unsized)]
 #![feature(unsize)]
 
+extern crate error;
 extern crate errors;
 extern crate ffi;
 extern crate macros;
@@ -10,7 +11,8 @@ extern crate result;
 
 use core::marker::Unsize;
 use core::ops::{CoerceUnsized, Deref, DerefMut};
-use errors::prelude::*;
+use error::*;
+use errors::*;
 use macros::prelude::*;
 use raw::{AsRaw, AsRawMut};
 use result::Result;
