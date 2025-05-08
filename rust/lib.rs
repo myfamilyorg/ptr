@@ -84,6 +84,19 @@ impl<T: ?Sized> Ptr<T> {
         self.raw().is_null()
     }
 
+    pub fn set_bit(&mut self, v: bool) {
+        let ptr = (&mut self.ptr) as *const _ as *const *const u8;
+        if v && (self.ptr as *const u8 as usize) % 2 == 0 {
+            unsafe {
+                ffi::ptr_add(ptr as *mut _, 1);
+            } // Add 1 to set the bit
+        } else if !v && (self.ptr as *const u8 as usize) % 2 != 0 {
+            unsafe {
+                ffi::ptr_add(ptr as *mut _, -1);
+            } // Subtract 1 to clear the bit
+        }
+    }
+
     pub fn get_bit(&self) -> bool {
         self.ptr as *const u8 as usize % 2 != 0
     }
