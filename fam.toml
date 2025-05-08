@@ -1,0 +1,6 @@
+[crate]
+	bin = "ptr"
+[deps]
+	ffi = { git = "https://github.com/myfamilyorg/ffi" }
+	result = { git = "https://github.com/myfamilyorg/result" }
+	error = { git = "https://github.com/myfamilyorg/error" }
