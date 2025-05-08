@@ -4,3 +4,4 @@
 	ffi = { git = "https://github.com/myfamilyorg/ffi" }
 	result = { git = "https://github.com/myfamilyorg/result" }
 	error = { git = "https://github.com/myfamilyorg/error" }
+	raw = { git = "https://github.com/myfamilyorg/raw" }

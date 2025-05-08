@@ -4,11 +4,13 @@
 
 extern crate error;
 extern crate ffi;
+extern crate raw;
 extern crate result;
 
 use core::marker::Unsize;
 use core::ops::{CoerceUnsized, Deref, DerefMut};
 use error::prelude::*;
+use raw::{AsRaw, AsRawMut};
 use result::Result;
 
 errors!(Alloc, MisalignedPointer);
@@ -27,14 +29,14 @@ where
 
 impl<T: ?Sized> PartialEq for Ptr<T> {
     fn eq(&self, other: &Self) -> bool {
-        self.raw() as *const u8 as usize == other.raw() as *const u8 as usize
+        self.as_ptr() as *const u8 as usize == other.as_ptr() as *const u8 as usize
     }
 }
 
 impl<T: ?Sized> Deref for Ptr<T> {
     type Target = T;
     fn deref(&self) -> &Self::Target {
-        unsafe { &*self.raw() }
+        unsafe { &*self.as_ptr() }
     }
 }
 
@@ -43,19 +45,53 @@ where
     T: ?Sized,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        unsafe { &mut *self.raw() }
+        unsafe { &mut *self.as_mut_ptr() }
     }
 }
 
 impl<T> AsRef<T> for Ptr<T> {
     fn as_ref(&self) -> &T {
-        unsafe { &(*self.raw()) }
+        unsafe { &(*self.as_ptr()) }
     }
 }
 
 impl<T> AsMut<T> for Ptr<T> {
     fn as_mut(&mut self) -> &mut T {
-        unsafe { &mut (*self.raw()) }
+        unsafe { &mut (*self.as_mut_ptr()) }
+    }
+}
+
+impl<T: ?Sized> AsRaw<T> for Ptr<T>
+where
+    Self: Sized,
+{
+    fn as_ptr(&self) -> *const T {
+        if self.get_bit() {
+            let mut ret = self.ptr;
+            unsafe {
+                ffi::ptr_add(&mut ret as *mut _ as *mut u8, -1);
+            }
+            ret as *const T
+        } else {
+            self.ptr as *const T
+        }
+    }
+}
+
+impl<T: ?Sized> AsRawMut<T> for Ptr<T>
+where
+    Self: Sized,
+{
+    fn as_mut_ptr(&mut self) -> *mut T {
+        if self.get_bit() {
+            let mut ret = self.ptr;
+            unsafe {
+                ffi::ptr_add(&mut ret as *mut _ as *mut u8, -1);
+            }
+            ret as *mut T
+        } else {
+            self.ptr as *mut T
+        }
     }
 }
 
@@ -81,7 +117,7 @@ impl<T: ?Sized> Ptr<T> {
     }
 
     pub fn is_null(&self) -> bool {
-        self.raw().is_null()
+        self.as_ptr().is_null()
     }
 
     pub fn set_bit(&mut self, v: bool) {
@@ -101,6 +137,7 @@ impl<T: ?Sized> Ptr<T> {
         self.ptr as *const u8 as usize % 2 != 0
     }
 
+    /*
     pub fn raw(&self) -> *mut T {
         if self.get_bit() {
             let mut ret = self.ptr;
@@ -112,15 +149,16 @@ impl<T: ?Sized> Ptr<T> {
             self.ptr as *mut T
         }
     }
+    */
 
     pub fn release(&self) {
         unsafe {
-            ffi::release(self.raw() as *const u8);
+            ffi::release(self.as_ptr() as *const u8);
         }
     }
 
     pub fn resize<R>(&mut self, n: usize) -> Result<Ptr<R>> {
-        let ptr = unsafe { ffi::resize(self.raw() as *const u8, n) };
+        let ptr = unsafe { ffi::resize(self.as_ptr() as *const u8, n) };
         if ptr.is_null() {
             err!(Alloc)
         } else {
