@@ -5,3 +5,4 @@
 	result = { git = "https://github.com/myfamilyorg/result" }
 	errors = { git = "https://github.com/myfamilyorg/errors" }
 	raw = { git = "https://github.com/myfamilyorg/raw" }
+	macros = { git = "https://github.com/myfamilyorg/macros" }

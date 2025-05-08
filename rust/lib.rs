@@ -4,12 +4,14 @@
 
 extern crate errors;
 extern crate ffi;
+extern crate macros;
 extern crate raw;
 extern crate result;
 
 use core::marker::Unsize;
 use core::ops::{CoerceUnsized, Deref, DerefMut};
 use errors::prelude::*;
+use macros::prelude::*;
 use raw::{AsRaw, AsRawMut};
 use result::Result;
 
@@ -96,12 +98,10 @@ where
 impl<T: ?Sized> Ptr<T> {
     pub fn new(ptr: *const T) -> Self {
         if (ptr as *const u8 as usize) % 2 != 0 {
-            /*
             exit!(
                 "Invalid pointer passed in to Ptr::new. Address must be divisible by 2! ptr={}",
                 ptr as *const u8 as usize
             );
-            */
         }
         Self { ptr }
     }
