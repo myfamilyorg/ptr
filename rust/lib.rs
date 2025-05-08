@@ -11,7 +11,6 @@ extern crate result;
 
 use core::marker::Unsize;
 use core::ops::{CoerceUnsized, Deref, DerefMut};
-use error::*;
 use errors::*;
 use macros::prelude::*;
 use raw::{AsRaw, AsRawMut};
